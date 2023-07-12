@@ -1,6 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
-
+const { putSchema } = require("../utils/schemaValidation");
 const contactsPath = path.join(__dirname, "contacts.json");
 
 const listContacts = async () => {
@@ -62,10 +62,15 @@ const updateContact = async (contactId, body) => {
       return null;
     }
 
+    const { error, value } = putSchema.validate(body);
+    if (error) {
+      throw new Error("Request body contains unappropriate fields");
+    }
+
     const indexOfElement = contactsArray.indexOf(element);
     const updatedElement = {
       ...element,
-      ...body,
+      ...value,
     };
     console.log(updatedElement);
     const updatedContactsArray = [...contactsArray];
@@ -88,3 +93,5 @@ module.exports = {
   addContact,
   updateContact,
 };
+
+// updateContact('C9sjBfCo4UJCWjzBnOtxl',{"name": "Simon Kilgour"});

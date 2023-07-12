@@ -1,8 +1,7 @@
 const express = require("express");
 const contacts = require("../../models/contactFunctions");
 const router = express.Router();
-const schema = require("../../utils/schemaValidation");
-
+const {schema,putSchema} = require("../../utils/schemaValidation");
 
 
 router.get("/", async (req, res, next) => {
@@ -26,11 +25,11 @@ router.post("/", async (req, res, next) => {
     res.status(400).json({ error: error.details[0].message });
   } else {
     try {
-    const result = await contacts.addContact(value);
-    res.status(201).json(result);
-  } catch (error) {
-    console.log(error);
-  }
+      const result = await contacts.addContact(value);
+      res.status(201).json(result);
+    } catch (error) {
+      console.log(error);
+    }
   }
 });
 
@@ -44,7 +43,21 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const { contactId } = req.params;
+  const request = req.body;
+  const { error, value } = putSchema.validate(request);
+  if (error) {
+    res.status(400).json({"message": "missing fields"});
+  } 
+  try {
+    const result = await contacts.updateContact(contactId, value);
+    if (!result) {
+      res.status(404).json({ message: "Not found" });
+    }
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 module.exports = router;
