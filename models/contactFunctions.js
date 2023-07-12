@@ -93,5 +93,3 @@ module.exports = {
   addContact,
   updateContact,
 };
-
-// updateContact('C9sjBfCo4UJCWjzBnOtxl',{"name": "Simon Kilgour"});
