@@ -27,7 +27,6 @@ const removeContact = async (contactId) => {
   const contactsArray = await listContacts();
   const element = contactsArray.find((el) => el.id === contactId);
 
-  console.log(element || null);
   if (!element) {
     return null;
   }

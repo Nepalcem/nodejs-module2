@@ -29,9 +29,8 @@ exports.createContact = async (req, res, next) => {
 exports.deleteContact = async (req, res, next) => {
   const { contactId } = req.params;
   const result = await contacts.removeContact(contactId);
-
   if (!result) {
-    res.status(404).json({ message: "Not found" });
+    return res.status(404).json({ message: "Not found" });
   }
   res.json({ message: "Contact deleted." });
 };
