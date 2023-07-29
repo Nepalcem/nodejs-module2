@@ -8,7 +8,6 @@ const {
 
 exports.getContacts = async (req, res, next) => {
   const result = await listContacts();
-
   res.json(result);
 };
 
@@ -24,13 +23,9 @@ exports.getContactById = async (req, res, next) => {
 
 exports.createContact = async (req, res, next) => {
   const request = req.body;
-
-  try {
-    const result = await addContact(request);
-    res.status(201).json(result);
-  } catch (error) {
-    console.log(error);
-  }
+  console.log(request, '123');
+  const result = await addContact(request);
+  res.status(201).json(result);
 };
 
 exports.deleteContact = async (req, res, next) => {

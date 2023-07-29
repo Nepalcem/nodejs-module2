@@ -1,7 +1,3 @@
-// const fs = require("fs/promises");
-// const path = require("path");
-// const contactsPath = path.join(__dirname, "contacts.json");
-
 const Contact = require("../models/contactModel");
 
 const listContacts = async () => {
@@ -14,10 +10,7 @@ const listContacts = async () => {
 
 const getContactById = async (contactId) => {
   try {
-    const contactsArray = await listContacts();
-    const element = contactsArray.find((el) => el.id === contactId);
-    console.log(element || null);
-    return element;
+    return Contact.findOne({ _id: contactId });
   } catch (error) {
     console.log(error);
   }
@@ -38,16 +31,11 @@ const removeContact = async (contactId) => {
 };
 
 const addContact = async (body) => {
-  const contactsArray = await listContacts();
-  const { nanoid } = await import("nanoid");
-  const newContact = {
-    id: nanoid(),
-    ...body,
-  };
-  const newContactsArray = [...contactsArray, newContact];
-  // await fs.writeFile(contactsPath, JSON.stringify(newContactsArray, null, 2));
-  console.log(newContact);
-  return newContact;
+  try {
+    return await Contact.create(body);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const updateContact = async (contactId, body) => {
