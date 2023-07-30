@@ -1,4 +1,5 @@
 const schema = require("../utils/schemaValidation");
+const Contact = require("../models/contactModel");
 
 exports.validateContact = async (req, res, next) => {
   const request = req.body;

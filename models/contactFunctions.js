@@ -10,9 +10,9 @@ const listContacts = async () => {
 
 const getContactById = async (contactId) => {
   try {
-    return Contact.findOne({ _id: contactId });
+    return await Contact.findOne({ _id: contactId });
   } catch (error) {
-    console.log(error);
+    console.log('123');
   }
 };
 
@@ -32,6 +32,10 @@ const removeContact = async (contactId) => {
 
 const addContact = async (body) => {
   try {
+    const existingContact = await Contact.findOne({ email: body.email });
+    if (existingContact) {
+      return existingContact.email
+    }
     return await Contact.create(body);
   } catch (error) {
     console.log(error);

@@ -23,8 +23,10 @@ exports.getContactById = async (req, res, next) => {
 
 exports.createContact = async (req, res, next) => {
   const request = req.body;
-  console.log(request, '123');
   const result = await addContact(request);
+  if (req.body.email === result) {
+    return res.status(400).json('User with such email already exist');
+  }
   res.status(201).json(result);
 };
 
