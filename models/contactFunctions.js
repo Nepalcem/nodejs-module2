@@ -12,29 +12,15 @@ const getContactById = async (contactId) => {
   try {
     return await Contact.findOne({ _id: contactId });
   } catch (error) {
-    console.log('123');
+    console.log(error.message);
   }
-};
-
-const removeContact = async (contactId) => {
-  const contactsArray = await listContacts();
-  const element = contactsArray.find((el) => el.id === contactId);
-
-  if (!element) {
-    return null;
-  }
-  const indexOfElement = contactsArray.indexOf(element);
-  const deletedElement = contactsArray.splice(indexOfElement, 1);
-
-  // await fs.writeFile(contactsPath, JSON.stringify(contactsArray, null, 2));
-  return deletedElement;
 };
 
 const addContact = async (body) => {
   try {
     const existingContact = await Contact.findOne({ email: body.email });
     if (existingContact) {
-      return existingContact.email
+      return existingContact.email;
     }
     return await Contact.create(body);
   } catch (error) {
@@ -42,32 +28,20 @@ const addContact = async (body) => {
   }
 };
 
+const removeContact = async (contactId) => {
+  try {
+    return await Contact.findByIdAndRemove({ _id: contactId });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 const updateContact = async (contactId, body) => {
   try {
-    const contactsArray = await listContacts();
-    const element = contactsArray.find((el) => el.id === contactId);
-
-    console.log(element || null);
-    if (!element) {
-      return null;
-    }
-
-    const indexOfElement = contactsArray.indexOf(element);
-    const updatedElement = {
-      ...element,
-      ...body,
-    };
-    console.log(updatedElement);
-    const updatedContactsArray = [...contactsArray];
-    updatedContactsArray[indexOfElement] = updatedElement;
-    // await fs.writeFile(
-    //   contactsPath,
-    //   JSON.stringify(updatedContactsArray, null, 2)
-    // );
-
-    return updatedElement;
+    const options = { new: true };
+    return await Contact.findByIdAndUpdate(contactId, body, options);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
   }
 };
 

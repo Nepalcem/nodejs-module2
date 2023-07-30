@@ -25,7 +25,7 @@ exports.createContact = async (req, res, next) => {
   const request = req.body;
   const result = await addContact(request);
   if (req.body.email === result) {
-    return res.status(400).json('User with such email already exist');
+    return res.status(409).json("User with such email already exist");
   }
   res.status(201).json(result);
 };
@@ -43,13 +43,9 @@ exports.patchContact = async (req, res, next) => {
   const { contactId } = req.params;
   const request = req.body;
 
-  try {
-    const result = await updateContact(contactId, request);
-    if (!result) {
-      res.status(404).json({ message: "Not found" });
-    }
-    res.json(result);
-  } catch (error) {
-    console.log(error);
+  const result = await updateContact(contactId, request);
+  if (!result) {
+    res.status(404).json({ message: "Not found" });
   }
+  res.json(result);
 };
