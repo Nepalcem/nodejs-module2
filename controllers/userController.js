@@ -49,3 +49,14 @@ exports.patchContact = async (req, res, next) => {
   }
   res.json(result);
 };
+
+exports.updateStatusContact = async (req, res, next) => {
+  const { contactId } = req.params;
+  const request = req.body;
+
+  const result = await updateContact(contactId, request);
+  if (!result) {
+    res.status(404).json({ message: "Not found" });
+  }
+  res.json(result);
+};
