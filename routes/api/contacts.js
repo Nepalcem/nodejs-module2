@@ -6,16 +6,25 @@ const {
   createContact,
   deleteContact,
   patchContact,
-  updateStatusContact,
+  // updateStatusContact,
 } = require("../../controllers/userController");
 
-const { validateContact, validateFavorite } = require("../../middleWares/validateContact");
+const {
+  validateContact,
+  validateFavorite,
+  validateContactId,
+} = require("../../middleWares/validateContact");
 
 router.get("/", getContacts);
-router.get("/:contactId", getContactById);
+router.get("/:contactId", validateContactId, getContactById);
 router.post("/", validateContact, createContact);
-router.delete("/:contactId", deleteContact);
-router.put("/:contactId", validateContact, patchContact);
-router.patch("/:contactId/favorite", validateFavorite, updateStatusContact);
+router.delete("/:contactId", validateContactId, deleteContact);
+router.put("/:contactId", validateContactId, validateContact, patchContact);
+router.patch(
+  "/:contactId/favorite",
+  validateContactId,
+  validateFavorite,
+  patchContact
+);
 
 module.exports = router;
