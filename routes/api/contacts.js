@@ -6,8 +6,8 @@ const {
   createContact,
   deleteContact,
   patchContact,
-  // updateStatusContact,
-} = require("../../controllers/userController");
+
+} = require("../../controllers/contactController");
 
 const {
   validateContact,
