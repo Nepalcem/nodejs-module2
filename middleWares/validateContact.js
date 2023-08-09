@@ -1,11 +1,8 @@
-const { schema, favoriteSchema } = require("../utils/schemaValidation");
+const { schema, favoriteSchema } = require("../models/contactModel");
 const { isValidObjectId } = require("mongoose");
 
 exports.validateContact = async (req, res, next) => {
   const request = req.body;
-  if (Object.keys(request).length === 0) {
-    return res.status(400).json({ message: "missing fields" });
-  }
   const { error, value } = schema.validate(request);
   if (error) {
     res.status(400).json({ error: error.details[0].message });
@@ -32,7 +29,7 @@ exports.validateFavorite = async (req, res, next) => {
 exports.validateContactId = async (req, res, next) => {
   const { contactId } = req.params;
   if (!isValidObjectId(contactId)) {
-    return res.status(400).json({ message: 'Invalid Contact Id' });
+    return res.status(400).json({ message: "Invalid Contact Id" });
   }
   next();
 };

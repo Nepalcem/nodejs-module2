@@ -6,7 +6,6 @@ const {
   createContact,
   deleteContact,
   patchContact,
-
 } = require("../../controllers/contactController");
 
 const {
@@ -14,12 +13,19 @@ const {
   validateFavorite,
   validateContactId,
 } = require("../../middleWares/validateContact");
+const validateBody = require("../../middleWares/validateBody");
 
 router.get("/", getContacts);
 router.get("/:contactId", validateContactId, getContactById);
-router.post("/", validateContact, createContact);
+router.post("/", validateBody, validateContact, createContact);
 router.delete("/:contactId", validateContactId, deleteContact);
-router.put("/:contactId", validateContactId, validateContact, patchContact);
+router.put(
+  "/:contactId",
+  validateContactId,
+  validateBody,
+  validateContact,
+  patchContact
+);
 router.patch(
   "/:contactId/favorite",
   validateContactId,

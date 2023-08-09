@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Joi = require("joi");
 
 const contactSchema = new Schema(
   {
@@ -30,4 +31,21 @@ const contactSchema = new Schema(
 
 const Contact = mongoose.model("Contact", contactSchema);
 
-module.exports = Contact;
+const schema = Joi.object({
+  name: Joi.string().required().messages({
+    "any.required": "Missing required Name field",
+  }),
+  email: Joi.string().email().required().messages({
+    "any.required": "Missing required Email field",
+  }),
+  phone: Joi.string().required().messages({
+    "any.required": "Missing required Phone field",
+  }),
+  favorite: Joi.boolean(),
+});
+
+const favoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
+module.exports = {Contact, schema, favoriteSchema};
