@@ -7,6 +7,7 @@ const {
 const {
   registrationController, authorizationController,
 } = require("../../controllers/authorizeController");
+const { validateToken } = require("../../middleWares/validateToken");
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.post(
   registrationController
 );
 router.post('/login', validateBody, validateUserFields,authorizationController);
+router.post("/logout", validateToken );
 
 module.exports = router;
