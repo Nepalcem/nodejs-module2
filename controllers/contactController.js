@@ -1,7 +1,8 @@
-const Contact = require("../models/contactModel");
+const {Contact} = require("../models/contactModel");
 
 exports.getContacts = async (req, res, next) => {
-  const result = await Contact.find();
+  const { _id: owner } = req.user;
+  const result = await Contact.find({owner: owner}).populate("owner", "_id email subscription");
   res.json(result);
 };
 
@@ -20,6 +21,8 @@ exports.getContactById = async (req, res, next) => {
 
 exports.createContact = async (req, res, next) => {
   const request = req.body;
+  const { _id: owner } = req.user;
+
   try {
     const existingContact = await Contact.findOne({ email: request.email });
     if (existingContact) {
@@ -28,7 +31,7 @@ exports.createContact = async (req, res, next) => {
         .json({ message: "User with such email already exists" });
     }
 
-    const result = await Contact.create(request);
+    const result = await Contact.create({...request, owner});
     return res.status(201).json(result);
   } catch (error) {
     console.error(error.message);

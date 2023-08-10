@@ -58,3 +58,13 @@ exports.getCurrentUser = async (req, res) => {
     "subscription": user.subscription,
   })
 };
+
+exports.logoutUser = async (req, res) => {
+  const {_id} = req.user;
+  try {
+    await User.findByIdAndUpdate(_id, {token: null});
+    res.status(204).json();
+  } catch (error) {
+    console.error(error.message);
+  }
+};

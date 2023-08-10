@@ -14,13 +14,15 @@ const {
   validateContactId,
 } = require("../../middleWares/validateContact");
 const validateBody = require("../../middleWares/validateBody");
+const { validateToken } = require("../../middleWares/validateToken");
 
-router.get("/", getContacts);
-router.get("/:contactId", validateContactId, getContactById);
-router.post("/", validateBody, validateContact, createContact);
-router.delete("/:contactId", validateContactId, deleteContact);
+router.get("/", validateToken, getContacts);
+router.get("/:contactId", validateToken, validateContactId, getContactById);
+router.post("/", validateToken, validateBody, validateContact, createContact);
+router.delete("/:contactId", validateToken, validateContactId, deleteContact);
 router.put(
   "/:contactId",
+  validateToken,
   validateContactId,
   validateBody,
   validateContact,
@@ -28,6 +30,7 @@ router.put(
 );
 router.patch(
   "/:contactId/favorite",
+  validateToken,
   validateContactId,
   validateFavorite,
   patchContact
