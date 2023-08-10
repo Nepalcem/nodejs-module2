@@ -5,7 +5,9 @@ const {
   validateUserFields,
 } = require("../../middleWares/authorizeMiddlewares");
 const {
-  registrationController, authorizationController,
+  registrationController,
+  authorizationController,
+  getCurrentUser,
 } = require("../../controllers/authorizeController");
 const { validateToken } = require("../../middleWares/validateToken");
 
@@ -18,7 +20,13 @@ router.post(
   checkIfUserExist,
   registrationController
 );
-router.post('/login', validateBody, validateUserFields,authorizationController);
-router.post("/logout", validateToken );
+router.post(
+  "/login",
+  validateBody,
+  validateUserFields,
+  authorizationController
+);
+router.post("/logout", validateToken);
+router.get("/current", validateToken, getCurrentUser);
 
 module.exports = router;

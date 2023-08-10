@@ -50,3 +50,11 @@ exports.authorizationController = async (req, res) => {
     console.error(error.message);
   }
 };
+
+exports.getCurrentUser = async (req, res) => {
+  const user = req.user;
+  res.status(200).json({
+    "email": user.email,
+    "subscription": user.subscription,
+  })
+};
