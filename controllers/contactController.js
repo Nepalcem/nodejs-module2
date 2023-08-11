@@ -2,12 +2,17 @@ const { Contact } = require("../models/contactModel");
 
 exports.getContacts = async (req, res, next) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 20, favorite } = req.query;
+  console.log(favorite);
   const skip = (page - 1) * limit;
-  const result = await Contact.find({ owner: owner }, null, {
-    skip,
-    limit,
-  }).populate("owner", "_id email subscription");
+  const result = await Contact.find(
+    { owner: owner, ...(favorite === undefined ? {} : { favorite }) },
+    null,
+    {
+      skip,
+      limit,
+    }
+  ).populate("owner", "_id email subscription");
   res.json(result);
 };
 
