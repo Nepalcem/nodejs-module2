@@ -68,3 +68,14 @@ exports.logoutUser = async (req, res) => {
     console.error(error.message);
   }
 };
+
+exports.updateSubscription = async (req,res, next) => {
+  const {_id} = req.user;
+  const {subscription} = req.body;
+  try {
+    await User.findByIdAndUpdate(_id, { subscription });
+    return res.status(200).json({ message: "Subscription updated successfully" });
+  } catch (error) {
+    console.error(error.message);
+  }
+}

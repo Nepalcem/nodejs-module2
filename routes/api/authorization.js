@@ -9,6 +9,7 @@ const {
   authorizationController,
   getCurrentUser,
   logoutUser,
+  updateSubscription,
 } = require("../../controllers/authorizeController");
 const { validateToken } = require("../../middleWares/validateToken");
 
@@ -29,5 +30,6 @@ router.post(
 );
 router.post("/logout", validateToken, logoutUser);
 router.get("/current", validateToken, getCurrentUser);
+router.patch("/", validateToken, validateBody, updateSubscription )
 
 module.exports = router;
