@@ -54,16 +54,16 @@ exports.authorizationController = async (req, res) => {
 exports.getCurrentUser = async (req, res) => {
   const user = req.user;
   res.status(200).json({
-    "email": user.email,
-    "subscription": user.subscription,
-  })
+    email: user.email,
+    subscription: user.subscription,
+  });
 };
 
 exports.logoutUser = async (req, res) => {
-  const {_id} = req.user;
+  const { _id } = req.user;
   try {
-    await User.findByIdAndUpdate(_id, {token: null});
-    res.status(204).json();
+    await User.findByIdAndUpdate(_id, { token: "" });
+    res.status(204).json({ message: "Logout successful" });
   } catch (error) {
     console.error(error.message);
   }
