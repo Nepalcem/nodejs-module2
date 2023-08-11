@@ -1,7 +1,18 @@
-const Contact = require("../models/contactModel");
+const { Contact } = require("../models/contactModel");
 
 exports.getContacts = async (req, res, next) => {
-  const result = await Contact.find();
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, favorite } = req.query;
+  console.log(favorite);
+  const skip = (page - 1) * limit;
+  const result = await Contact.find(
+    { owner: owner, ...(favorite === undefined ? {} : { favorite }) },
+    null,
+    {
+      skip,
+      limit,
+    }
+  ).populate("owner", "_id email subscription");
   res.json(result);
 };
 
@@ -20,6 +31,8 @@ exports.getContactById = async (req, res, next) => {
 
 exports.createContact = async (req, res, next) => {
   const request = req.body;
+  const { _id: owner } = req.user;
+
   try {
     const existingContact = await Contact.findOne({ email: request.email });
     if (existingContact) {
@@ -28,7 +41,7 @@ exports.createContact = async (req, res, next) => {
         .json({ message: "User with such email already exists" });
     }
 
-    const result = await Contact.create(request);
+    const result = await Contact.create({ ...request, owner });
     return res.status(201).json(result);
   } catch (error) {
     console.error(error.message);
@@ -62,18 +75,3 @@ exports.patchContact = async (req, res, next) => {
     console.log(error.message);
   }
 };
-
-// exports.updateStatusContact = async (req, res, next) => {
-//   const { contactId } = req.params;
-//   const request = req.body;
-//   try {
-//     const options = { new: true };
-//     const result = await Contact.findByIdAndUpdate(contactId, request, options);
-//     if (!result) {
-//       return res.status(404).json({ message: "Not found" });
-//     }
-//     return res.json(result);
-//   } catch (error) {
-//     console.log(error.message);
-//   }
-// };
