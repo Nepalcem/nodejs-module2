@@ -1,55 +1,54 @@
 const { User } = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const gravatar = require("gravatar");
 const signToken = require("../utils/signToken");
+const path = require("path");
+const fs = require("fs/promises");
+const tryCatchHandler = require("../utils/tryCatchHandler");
 
-exports.registrationController = async (req, res) => {
-  const { password } = req.body;
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      ...req.body,
-      password: hashedPassword,
-    };
-
-    const createdUser = await User.create(newUser);
-    return res.status(201).json({
-      user: {
-        email: createdUser.email,
-        subscription: createdUser.subscription,
-      },
-    });
-  } catch (error) {
-    console.error(error.message);
-  }
-};
-
-exports.authorizationController = async (req, res) => {
+exports.registrationController = tryCatchHandler(async (req, res) => {
   const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Email or password is wrong" });
-    }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const avatarURL = gravatar.url(email);
 
-    const passwordCompare = await bcrypt.compare(password, user.password);
-    if (!passwordCompare) {
-      return res.status(401).json({ message: "Email or password is wrong" });
-    }
+  const newUser = {
+    ...req.body,
+    password: hashedPassword,
+    avatarURL,
+  };
 
-    const token = signToken(user.id);
-    await User.findByIdAndUpdate(user._id, { token });
+  const createdUser = await User.create(newUser);
+  return res.status(201).json({
+    user: {
+      email: createdUser.email,
+      subscription: createdUser.subscription,
+    },
+  });
+});
 
-    return res.status(200).json({
-      token,
-      user: {
-        email: user.email,
-        subscription: user.subscription,
-      },
-    });
-  } catch (error) {
-    console.error(error.message);
+exports.authorizationController = tryCatchHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(401).json({ message: "Email or password is wrong" });
   }
-};
+
+  const passwordCompare = await bcrypt.compare(password, user.password);
+  if (!passwordCompare) {
+    return res.status(401).json({ message: "Email or password is wrong" });
+  }
+
+  const token = signToken(user.id);
+  await User.findByIdAndUpdate(user._id, { token });
+
+  return res.status(200).json({
+    token,
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
+  });
+});
 
 exports.getCurrentUser = async (req, res) => {
   const user = req.user;
@@ -59,23 +58,34 @@ exports.getCurrentUser = async (req, res) => {
   });
 };
 
-exports.logoutUser = async (req, res) => {
+exports.logoutUser = tryCatchHandler(async (req, res) => {
   const { _id } = req.user;
-  try {
-    await User.findByIdAndUpdate(_id, { token: "" });
-    res.status(204).json({ message: "Logout successful" });
-  } catch (error) {
-    console.error(error.message);
-  }
-};
+  await User.findByIdAndUpdate(_id, { token: "" });
+  res.status(204).json({ message: "Logout successful" });
+});
 
-exports.updateSubscription = async (req,res, next) => {
-  const {_id} = req.user;
-  const {subscription} = req.body;
-  try {
-    await User.findByIdAndUpdate(_id, { subscription });
-    return res.status(200).json({ message: "Subscription updated successfully" });
-  } catch (error) {
-    console.error(error.message);
-  }
-}
+exports.updateSubscription = tryCatchHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { subscription } = req.body;
+
+  await User.findByIdAndUpdate(_id, { subscription });
+  return res.status(200).json({ message: "Subscription updated successfully" });
+});
+
+exports.updateAvatar = tryCatchHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+  const avatarDir = path.join(__dirname, "../", "public", "avatars");
+
+  const filename = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarDir, filename);
+
+  await fs.rename(tempUpload, resultUpload);
+  const avatarURL = path.join("avatars", filename);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({
+    message: "Avatar changed successfully",
+    avatarURL,
+  });
+});
