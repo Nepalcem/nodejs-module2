@@ -3,9 +3,11 @@ const bcrypt = require("bcryptjs");
 const gravatar = require("gravatar");
 const signToken = require("../utils/signToken");
 const path = require("path");
+const fs = require('fs/promises');
+
 
 const tryCatchHandler = require("../utils/tryCatchHandler");
-const Jimp = require("jimp");;
+const Jimp = require("jimp");
 
 exports.registrationController = tryCatchHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -73,26 +75,6 @@ exports.updateSubscription = tryCatchHandler(async (req, res) => {
   return res.status(200).json({ message: "Subscription updated successfully" });
 });
 
-
-// exports.updateAvatar = tryCatchHandler(async (req, res) => {
-//   const { _id } = req.user;
-
-//   const { path: tempUpload, originalname } = req.file;
-//   const avatarDir = path.join(__dirname, "../", "public", "avatars");
-
-//   const filename = `${_id}_${originalname}`;
-//   const resultUpload = path.join(avatarDir, filename);
-
-//   await fs.rename(tempUpload, resultUpload);
-//   const avatarURL = path.join("avatars", filename);
-//   await User.findByIdAndUpdate(_id, { avatarURL });
-
-//   res.json({
-//     message: "Avatar changed successfully",
-//     avatarURL,
-//   });
-// });
-
 exports.updateAvatar = tryCatchHandler(async (req, res) => {
   const { _id } = req.user;
 
@@ -101,14 +83,16 @@ exports.updateAvatar = tryCatchHandler(async (req, res) => {
   const filename = `${_id}_${originalname}`;
 
   await Jimp.read(tempUpload).then((image) => {
-    return image.resize(250, 250).quality(80).write(path.join(avatarDir, filename));
-  })
-
+    return image
+      .resize(250, 250)
+      .quality(80)
+      .write(path.join(avatarDir, filename));
+  });
+  await fs.unlink(tempUpload);
   const avatarURL = path.join("avatars", filename);
   await User.findByIdAndUpdate(_id, { avatarURL });
 
   res.json({
-    message: "Avatar changed successfully",
     avatarURL,
   });
 });
