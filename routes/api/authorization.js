@@ -10,8 +10,10 @@ const {
   getCurrentUser,
   logoutUser,
   updateSubscription,
+  updateAvatar,
 } = require("../../controllers/authorizeController");
 const { validateToken } = require("../../middleWares/validateToken");
+const upload = require("../../middleWares/upload");
 
 const router = express.Router();
 
@@ -30,6 +32,7 @@ router.post(
 );
 router.post("/logout", validateToken, logoutUser);
 router.get("/current", validateToken, getCurrentUser);
-router.patch("/", validateToken, validateBody, updateSubscription )
+router.patch("/", validateToken, validateBody, updateSubscription);
+router.patch("/avatars", validateToken, upload.single("avatar"), updateAvatar);
 
 module.exports = router;
