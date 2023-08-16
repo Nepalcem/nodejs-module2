@@ -14,15 +14,3 @@ const sendEmail = async(data) => {
 }
 
 module.exports = sendEmail;
-
-// const email = {
-//   to: "cotihab710@tipent.com",
-//   from: "mfrommail.ru@gmail.com",
-//   subject: "Test Email",
-//   html: "<p>Verify email address by using the following link - <a href=''></a></p>",
-// };
-
-// sGmail
-//   .send(email)
-//   .then(() => console.log("email sent"))
-//   .catch((error) => console.log(error.message));

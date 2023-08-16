@@ -132,3 +132,30 @@ exports.verifyMailToken = tryCatchHandler(async (req, res) => {
 
   return res.status(200).json({ message: "Verification successful" });
 });
+
+exports.secondaryEmailVerification = tryCatchHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.verified) {
+    return res
+      .status(400)
+      .json({ message: "Verification has already been passed" });
+  }
+  
+  const {_id} = user;
+  const verificationCode = nanoid();
+  await User.findByIdAndUpdate(_id, { verificationToken: verificationCode });
+
+  const verifyEmail = {
+    to: email,
+    subject: "Secondary Email Verification",
+    html: `<p>Verify email address by using the following link 
+    - <a target="_blank" href="${BASE_URL}/users/verify/${verificationCode}">CLick Me!</a></p>`,
+  };
+
+  await sendEmail(verifyEmail);
+  return res.status(200).json({ message: "Verification email sent" });
+});
