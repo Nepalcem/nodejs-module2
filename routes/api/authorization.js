@@ -11,6 +11,7 @@ const {
   logoutUser,
   updateSubscription,
   updateAvatar,
+  verifyMailToken,
 } = require("../../controllers/authorizeController");
 const { validateToken } = require("../../middleWares/validateToken");
 const upload = require("../../middleWares/upload");
@@ -34,5 +35,6 @@ router.post("/logout", validateToken, logoutUser);
 router.get("/current", validateToken, getCurrentUser);
 router.patch("/", validateToken, validateBody, updateSubscription);
 router.patch("/avatars", validateToken, upload.single("avatar"), updateAvatar);
+router.get("/verify/:verificationToken", verifyMailToken);
 
 module.exports = router;
