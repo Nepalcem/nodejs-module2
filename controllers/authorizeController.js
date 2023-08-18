@@ -145,15 +145,13 @@ exports.secondaryEmailVerification = tryCatchHandler(async (req, res) => {
       .json({ message: "Verification has already been passed" });
   }
   
-  const {_id} = user;
-  const verificationCode = nanoid();
-  await User.findByIdAndUpdate(_id, { verificationToken: verificationCode });
+  const {verificationToken} = user;
 
   const verifyEmail = {
     to: email,
     subject: "Secondary Email Verification",
     html: `<p>Verify email address by using the following link 
-    - <a target="_blank" href="${BASE_URL}/users/verify/${verificationCode}">CLick Me!</a></p>`,
+    - <a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">CLick Me!</a></p>`,
   };
 
   await sendEmail(verifyEmail);
