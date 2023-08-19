@@ -3,6 +3,7 @@ const validateBody = require("../../middleWares/validateBody");
 const {
   checkIfUserExist,
   validateUserFields,
+  validateEmailBody,
 } = require("../../middleWares/authorizeMiddlewares");
 const {
   registrationController,
@@ -11,6 +12,8 @@ const {
   logoutUser,
   updateSubscription,
   updateAvatar,
+  verifyMailToken,
+  secondaryEmailVerification,
 } = require("../../controllers/authorizeController");
 const { validateToken } = require("../../middleWares/validateToken");
 const upload = require("../../middleWares/upload");
@@ -34,5 +37,7 @@ router.post("/logout", validateToken, logoutUser);
 router.get("/current", validateToken, getCurrentUser);
 router.patch("/", validateToken, validateBody, updateSubscription);
 router.patch("/avatars", validateToken, upload.single("avatar"), updateAvatar);
+router.post("/verify", validateEmailBody, secondaryEmailVerification );
+router.get("/verify/:verificationToken", verifyMailToken);
 
 module.exports = router;

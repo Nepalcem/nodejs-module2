@@ -1,26 +1,42 @@
-const { User } = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const gravatar = require("gravatar");
-const signToken = require("../utils/signToken");
 const path = require("path");
-const fs = require('fs/promises');
-
-
-const tryCatchHandler = require("../utils/tryCatchHandler");
+const fs = require("fs/promises");
+const { nanoid } = require("nanoid");
 const Jimp = require("jimp");
+const dotenv = require("dotenv");
+
+const signToken = require("../utils/signToken");
+const { User } = require("../models/userModel");
+const tryCatchHandler = require("../utils/tryCatchHandler");
+const sendEmail = require("../utils/sendGridService");
+
+dotenv.config({ path: path.join(__dirname, "..", "environment", ".env") });
+const { BASE_URL } = process.env;
 
 exports.registrationController = tryCatchHandler(async (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email);
 
+  const verificationCode = nanoid();
   const newUser = {
     ...req.body,
     password: hashedPassword,
     avatarURL,
+    verificationToken: verificationCode,
   };
 
   const createdUser = await User.create(newUser);
+  const verifyEmail = {
+    to: email,
+    subject: "Verify Email Address",
+    html: `<p>Verify email address by using the following link 
+    - <a target="_blank" href="${BASE_URL}/users/verify/${verificationCode}">CLick Me!</a></p>`,
+  };
+
+  await sendEmail(verifyEmail);
+
   return res.status(201).json({
     user: {
       email: createdUser.email,
@@ -33,6 +49,9 @@ exports.authorizationController = tryCatchHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
+    return res.status(401).json({ message: "Email or password is wrong" });
+  }
+  if (!user.verified) {
     return res.status(401).json({ message: "Email or password is wrong" });
   }
 
@@ -95,4 +114,46 @@ exports.updateAvatar = tryCatchHandler(async (req, res) => {
   res.json({
     avatarURL,
   });
+});
+
+exports.verifyMailToken = tryCatchHandler(async (req, res) => {
+  const { verificationToken } = req.params;
+
+  const user = await User.findOne({ verificationToken });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const { _id } = user;
+  await User.findByIdAndUpdate(_id, {
+    verified: true,
+    verificationToken: null,
+  });
+
+  return res.status(200).json({ message: "Verification successful" });
+});
+
+exports.secondaryEmailVerification = tryCatchHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.verified) {
+    return res
+      .status(400)
+      .json({ message: "Verification has already been passed" });
+  }
+  
+  const {verificationToken} = user;
+
+  const verifyEmail = {
+    to: email,
+    subject: "Secondary Email Verification",
+    html: `<p>Verify email address by using the following link 
+    - <a target="_blank" href="${BASE_URL}/users/verify/${verificationToken}">CLick Me!</a></p>`,
+  };
+
+  await sendEmail(verifyEmail);
+  return res.status(200).json({ message: "Verification email sent" });
 });
